@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Server Routes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', 'Courier New', monospace;
+            line-height: 1.4;
+            color: #00ffff;
+            background: #000011;
+            background-image: 
+                radial-gradient(circle at 25% 25%, #ff00ff 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, #00ffff 0%, transparent 50%),
+                linear-gradient(45deg, #000011 25%, #001122 25%, #001122 50%, #000011 50%, #000011 75%, #001122 75%);
+            background-size: 200px 200px, 200px 200px, 20px 20px;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 255, 0.03) 2px,
+                rgba(0, 255, 255, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 20, 40, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 0;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                transparent 25%, 
+                rgba(255, 0, 255, 0.1) 25%, 
+                rgba(255, 0, 255, 0.1) 50%, 
+                transparent 50%, 
+                transparent 75%, 
+                rgba(255, 0, 255, 0.1) 75%);
+            background-size: 30px 30px;
+            pointer-events: none;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+            color: #000;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid #ffff00;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            font-weight: 700;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+        
+        .content {
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .route-section {
+            margin-bottom: 40px;
+        }
+        
+        .route-section h2 {
+            color: #ffff00;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 3px solid #ff00ff;
+            padding-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
+        }
+        
+        .route-card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 0;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .route-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(0, 255, 255, 0.2), 
+                transparent);
+            transition: left 0.5s;
+        }
+        
+        .route-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 30px rgba(0, 255, 255, 0.3),
+                0 0 20px rgba(255, 0, 255, 0.2);
+            border-color: #ff00ff;
+        }
+        
+        .route-card:hover::before {
+            left: 100%;
+        }
+        
+        .route-method {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff00ff, #ffff00);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-right: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: none;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+        
+        .route-path {
+            font-family: 'Orbitron', 'Courier New', monospace;
+            font-size: 1.3rem;
+            color: #00ffff;
+            font-weight: 700;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.8);
+            text-transform: uppercase;
+        }
+        
+        .route-description {
+            margin-top: 15px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Orbitron', monospace;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        
+        .test-button:hover {
+            background: linear-gradient(45deg, #ffff00, #ff00ff);
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 25px;
+            text-align: center;
+            color: #00ffff;
+            border-top: 3px solid #ff00ff;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: neonPulse 1.5s infinite;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+        }
+        
+        @keyframes neonPulse {
+            0%, 100% { 
+                opacity: 1;
+                box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            }
+            50% { 
+                opacity: 0.5;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 1);
+            }
+        }
+        
+        @keyframes glitch {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-2px); }
+            40% { transform: translateX(2px); }
+            60% { transform: translateX(-1px); }
+            80% { transform: translateX(1px); }
+        }
+        
+        .container:hover {
+            animation: glitch 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Express Server</h1>
+            <p><span class="status-indicator"></span>Server is running on http://localhost:3000</p>
+        </div>
+        
+        <div class="content">
+            <div class="route-section">
+                <h2>Available Routes</h2>
+                
+                <div class="route-card">
+                    <div>
+                        <span class="route-method">GET</span>
+                        <span class="route-path">/</span>
+                    </div>
+                    <div class="route-description">
+                        HTML documentation page showing all available routes (this page)
+                    </div>
+                    <button class="test-button" onclick="window.location.reload()">Reload Page</button>
+                </div>
+                
+                <div class="route-card">
+                    <div>
+                        <span class="route-method">GET</span>
+                        <span class="route-path">/api</span>
+                    </div>
+                    <div class="route-description">
+                        API welcome message with server information and available endpoints
+                    </div>
+                    <button class="test-button" onclick="testRoute('/api')">Test Route</button>
+                </div>
+                
+                <div class="route-card">
+                    <div>
+                        <span class="route-method">GET</span>
+                        <span class="route-path">/api/health</span>
+                    </div>
+                    <div class="route-description">
+                        Health check endpoint - returns server status and uptime
+                    </div>
+                    <button class="test-button" onclick="testRoute('/api/health')">Test Route</button>
+                </div>
+                
+                <div class="route-card">
+                    <div>
+                        <span class="route-method">GET</span>
+                        <span class="route-path">/api/users</span>
+                    </div>
+                    <div class="route-description">
+                        Sample users data - returns a list of example users
+                    </div>
+                    <button class="test-button" onclick="testRoute('/api/users')">Test Route</button>
+                </div>
+                
+                <div class="route-card">
+                    <div>
+                        <span class="route-method">GET</span>
+                        <span class="route-path">/animations</span>
+                    </div>
+                    <div class="route-description">
+                        Pixel animations page with 64x64 arcade-style animations
+                    </div>
+                    <button class="test-button" onclick="window.open('/animations', '_blank')">Open Page</button>
+                </div>
+            </div>
+            
+            <div class="route-section">
+                <h2>Testing</h2>
+                <p>Click the "Test Route" buttons above to see the API responses, or use curl commands:</p>
+                <div class="route-card">
+                    <pre style="background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto;">
+curl http://localhost:3000/api
+curl http://localhost:3000/api/health
+curl http://localhost:3000/api/users</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Node.js Express Server • Built with ❤️</p>
+        </div>
+    </div>
+    
+    <script>
+        async function testRoute(path) {
+            try {
+                const response = await fetch(path);
+                const data = await response.json();
+                
+                // Create a new window to display the JSON response
+                const newWindow = window.open('', '_blank', 'width=600,height=400');
+                newWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>API Response: ${path}</title>
+                            <style>
+                                body { 
+                                    font-family: 'Courier New', monospace; 
+                                    padding: 20px; 
+                                    background: #2c3e50; 
+                                    color: #ecf0f1; 
+                                }
+                                pre { 
+                                    white-space: pre-wrap; 
+                                    word-wrap: break-word; 
+                                }
+                                h1 { color: #3498db; }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>Response from ${path}</h1>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </body>
+                    </html>
+                `);
+                newWindow.document.close();
+            } catch (error) {
+                alert('Error testing route: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html> 
